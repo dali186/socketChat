@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <link rel="stylesheet" type="text/css">
+  <head th:insert="fragments.html::head(title)"></head>
+</head>
+<body>
+<div th:insert="fragments.html::menu(menu)"></div>
+<br><br><br>
+<div sec:authorize="isAuthenticated()">
+  <div class="authentication">
+    <b>Hi, <span sec:authentication="principal.username"></span></b>
+    <b><a class="nav-link" th:href="@{/logout}">LOGOUT</a></b>
+  </div>
+</div>
+</body>
+</html>
