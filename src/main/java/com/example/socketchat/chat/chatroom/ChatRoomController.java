@@ -63,9 +63,11 @@ public class ChatRoomController {
             ChatRoom chatRoom = chatRoomList.get(i);
             chatRoomInfo.setRoomId(chatRoom.getId());
             chatRoomInfo.setRoomTitle(chatRoom.getTitle());
-            Optional<ChatMessage> message = chatMessageRepository.findTopByOrderByCreatedAtDesc(chatRoom.getId());
+
+            Optional<ChatMessage> message = chatMessageRepository.findFirstByRoomIdOrderByCreatedAtDesc(chatRoom.getId());
             chatRoomInfo.setRecentMessage(message.get().getContent());
             chatRoomInfo.setTime(message.get().getCreatedAt());
+
             chatRoomListDTO.add(chatRoomInfo);
         }
         return chatRoomListDTO;
