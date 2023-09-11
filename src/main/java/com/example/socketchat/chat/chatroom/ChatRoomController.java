@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.StringTokenizer;
 
 
 @Controller
@@ -22,10 +22,10 @@ public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
     private final ChatMessageRepository chatMessageRepository;
-    private final MemberService memberService;
 
     //1:1 채팅방 생성
-    //TODO 중복처리, 채팅방 타이틀 설정하기
+    //TODO 중복처리 서비스 단에서 처리(DONE)
+    //TODO 채팅방 타이틀 설정하기 (DONE)
     @GetMapping("/chat/open/p/{memberId}")
     public String openPersonalRoom(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long memberId) {
         ChatRoom chatRoom = new ChatRoom();
@@ -33,7 +33,7 @@ public class ChatRoomController {
         chatRoom.getMemberList().add(memberId);
 
         chatRoom.setType(ChatRoomType.PERSONAL);
-        chatRoom.setTitle(userDetails.getUserId() + " and " + memberId);
+        chatRoom.setTitle(userDetails.getUserId() + "_" + memberId);
 
         String roomId = chatRoomService.openChatRoom(chatRoom);
 
@@ -41,7 +41,9 @@ public class ChatRoomController {
     }
 
     //채팅방 목록 출력 (단체톡 조회랑 개인톡 조회 api를 분리해도 좋을 것 같음)
-    //TODO 최근 채팅, 시간 조회 + 채팅방 이름 상대방으로 적용
+    //TODO 최근 채팅, 시간 조회 + 채팅방 이름 상대방으로 적용 (DONE)
+    //TODO 안읽은 내역 개수 처리
+    //TODO 실시간으로 업데이트 방법 고려
     @GetMapping("/chat/rooms")
     public String memberChatRoomList(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         Long memberId = userDetails.getUserId();
@@ -54,6 +56,18 @@ public class ChatRoomController {
         return "chatroomlist";
     }
 
+    @GetMapping("/chat/room/{roomId}")
+    public String eneterChat(@PathVariable String roomId, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        ChatRoom chatRoom = chatRoomService.findChatRoomById(roomId);
+        chatRoom.getMemberList().remove(userDetails.getUserId());
+        List<ChatMessage> messageList = chatMessageRepository.mFindByRoomId(roomId);
+        model.addAttribute("memberId", userDetails.getUserId());
+        model.addAttribute("opId", chatRoom.getMemberList().get(0));
+        model.addAttribute("messageList", messageList);
+
+        return "chat";
+    }
+
     //채팅방의 정보를 설정하는 메소드
     private List<ChatRoomResponse.ChatRoomListDTO> chatPersonalRoomListInfo(Long memberId) {
         List<ChatRoomResponse.ChatRoomListDTO> chatRoomListDTO = new ArrayList<>();
@@ -62,9 +76,14 @@ public class ChatRoomController {
             ChatRoomResponse.ChatRoomListDTO chatRoomInfo = new ChatRoomResponse.ChatRoomListDTO();
             ChatRoom chatRoom = chatRoomList.get(i);
             chatRoomInfo.setRoomId(chatRoom.getId());
-            chatRoomInfo.setRoomTitle(chatRoom.getTitle());
 
-            //TODO 쿼리수정 - duplicate key
+            //채팅방 제목을 설정하는 부분
+            StringTokenizer tokenizer = new StringTokenizer(chatRoom.getTitle(), "_");
+            String tempTitle = tokenizer.nextToken();
+            chatRoomInfo.setRoomTitle(tempTitle);
+            if (Long.parseLong(tempTitle) == memberId) chatRoomInfo.setRoomTitle(tokenizer.nextToken());
+
+            //TODO 쿼리수정 - duplicate key (DONE)
             ChatMessage message = chatMessageRepository.findTopByRoomIdOrderByCreatedAtDesc(chatRoom.getId()).get(0);
             chatRoomInfo.setRecentMessage(message.getContent());
             chatRoomInfo.setTime(message.getCreatedAt());
