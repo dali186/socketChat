@@ -12,7 +12,7 @@ import java.util.List;
 public class ChatRoom {
     @Id
     private String id;
-    private String type;
+    private ChatRoomType type;
     private String title;
     private String notice;
     private String contentNotice;

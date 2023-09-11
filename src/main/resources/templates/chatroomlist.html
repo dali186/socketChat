@@ -38,7 +38,7 @@
     </thead>
     <tbody>
     <!-- 반복문으로 멤버 리스트의 각 항목 순회 -->
-    <tr th:each="room : ${roomList}">
+    <tr th:each="room : ${pRoomList}">
       <!-- member 객체의 필드를 출력 -->
       <td><a th:href="@{/chat/room/{roomId}(roomId=${room.id})}"><p th:text="${room.title}"></p></a></td>
       <td th:text="${room.type}"></td>

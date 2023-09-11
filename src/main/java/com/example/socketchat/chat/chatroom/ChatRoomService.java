@@ -23,4 +23,10 @@ public class ChatRoomService {
         List<ChatRoom> chatRooms = chatRoomRepository.findMemberRoomById(memberId);
         return chatRooms;
     }
+
+    @Transactional
+    public List<ChatRoom> findMemberPersonalChatRooms(Long memberId) {
+        List<ChatRoom> chatRooms = chatRoomRepository.findPersonalRoomById(memberId);
+        return chatRooms;
+    }
 }

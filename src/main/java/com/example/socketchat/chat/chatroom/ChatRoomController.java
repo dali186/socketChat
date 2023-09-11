@@ -23,13 +23,14 @@ public class ChatRoomController {
 
     //1:1 채팅방 생성
     //TODO 중복처리
-    @GetMapping("/chat/open/{memberId}")
-    public String openRoom(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long memberId) {
+    @GetMapping("/chat/open/p/{memberId}")
+    public String openPersonalRoom(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long memberId) {
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.getMemberList().add(userDetails.getUserId());
         chatRoom.getMemberList().add(memberId);
 
         chatRoom.setTitle(memberService.findMemberById(memberId).get().getUsername());
+        chatRoom.setType(ChatRoomType.PERSONAL);
 
         String roomId = chatRoomService.openChatRoom(chatRoom);
 
@@ -41,6 +42,7 @@ public class ChatRoomController {
     public String memberChatRoomList(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         Long memberId = userDetails.getUserId();
 
+        model.addAttribute("pRoomList", chatRoomService.findMemberPersonalChatRooms(memberId));
         model.addAttribute("roomList", chatRoomService.findMemberChatRooms(memberId));
 
         return "chatroomlist";
