@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <title>Chat</title>
+  <head th:insert="fragments.html::head(title)"></head>
+</head>
+
+<body>
+<div th:insert="fragments.html::menu(menu)"></div>
+<br><br><br>
+<div class="container mt-5">
+  <h1>ChatRoom</h1>
+
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>개인톡</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- 반복문으로 멤버 리스트의 각 항목 순회 -->
+    <tr th:each="room : ${roomList}">
+      <!-- member 객체의 필드를 출력 -->
+      <td><a th:href="@{/chat/room/{roomId}(roomId=${room.id})}"><p th:text="${room.title}"></p></a></td>
+      <td th:text="${room.type}"></td>
+      <td th:text="${room.notice}"></td>
+      <td th:text="${room.id}"></td>
+    </tr>
+    </tbody>
+  </table>
+
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>단체톡</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- 반복문으로 멤버 리스트의 각 항목 순회 -->
+    <tr th:each="room : ${roomList}">
+      <!-- member 객체의 필드를 출력 -->
+      <td><a th:href="@{/chat/room/{roomId}(roomId=${room.id})}"><p th:text="${room.title}"></p></a></td>
+      <td th:text="${room.type}"></td>
+      <td th:text="${room.notice}"></td>
+      <td th:text="${room.id}"></td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</body>
+
+</html>

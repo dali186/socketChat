@@ -1,34 +1,60 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
-  <title>Chat Room List</title>
-  <head th:insert="fragments.html::head(title)"></head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <title>Spring Boot WebSocket Chat Application</title>
+  <link rel="stylesheet" href="/css/main.css"/>
 </head>
-
 <body>
-<div th:insert="fragments.html::menu(menu)"></div>
-<br><br><br>
-<div class="container mt-5">
-  <h1>Chat</h1>
+<noscript>
+  <h2>Sorry! Your browser doesn't support Javascript</h2>
+</noscript>
 
-  <table class="table table-striped">
-    <thead>
-    <tr>
-      <th>Chat</th>
-    </tr>
-    </thead>
-    <tbody>
-    <!-- 반복문으로 멤버 리스트의 각 항목 순회 -->
-    <tr th:each="roomChat : ${roomChats}">
-      <!-- member 객체의 필드를 출력 -->
-      <td th:text="${roomChat.sender}"></td>
-      <td th:text="${roomChat.data}"></td>
-      <td th:text="${roomChat.createdAt}"></td>
-    </tr>
-    </tbody>
-  </table>
+<div id="username-page">
+  <div class="username-page-container">
+    <h1 class="title">Type your username to enter the Chatroom</h1>
+    <form id="usernameForm" name="usernameForm">
+      <div class="form-group">
+        <input type="text" id="name" placeholder="Username" autocomplete="off" class="form-control"
+               th:value="${memberId}" readonly/>
+      </div>
+      <div class="form-group">
+        <button type="submit" class="accent username-submit">Start Chatting</button>
+      </div>
+    </form>
+  </div>
 </div>
-</body>
 
+<div id="chat-page" class="hidden">
+  <div class="chat-container">
+    <div class="chat-header">
+      <h2>Spring WebSocket Chat Demo - By Alibou</h2>
+    </div>
+    <div class="connecting">
+      Connecting...
+    </div>
+    <ul id="messageArea">
+      <table>
+        <tr th:each="message : ${messageList}">
+          <td th:text="${message.sender}"></td>
+          <td th:text="${message.content}"></td>
+          <td th:text="${message.createdAt}"></td>
+        </tr>
+      </table>
+    </ul>
+    <form id="messageForm" name="messageForm">
+      <div class="form-group">
+        <div class="input-group clearfix">
+          <input type="text" id="message" placeholder="Type a message..." autocomplete="off" class="form-control"/>
+          <button type="submit" class="primary">Send</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script src="/js/main.js"></script>
+</body>
 </html>
