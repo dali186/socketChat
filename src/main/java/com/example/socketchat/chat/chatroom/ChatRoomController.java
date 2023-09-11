@@ -64,9 +64,10 @@ public class ChatRoomController {
             chatRoomInfo.setRoomId(chatRoom.getId());
             chatRoomInfo.setRoomTitle(chatRoom.getTitle());
 
-            Optional<ChatMessage> message = chatMessageRepository.findFirstByRoomIdOrderByCreatedAtDesc(chatRoom.getId());
-            chatRoomInfo.setRecentMessage(message.get().getContent());
-            chatRoomInfo.setTime(message.get().getCreatedAt());
+            //TODO 쿼리수정 - duplicate key
+            ChatMessage message = chatMessageRepository.findTopByRoomIdOrderByCreatedAtDesc(chatRoom.getId()).get(0);
+            chatRoomInfo.setRecentMessage(message.getContent());
+            chatRoomInfo.setTime(message.getCreatedAt());
 
             chatRoomListDTO.add(chatRoomInfo);
         }

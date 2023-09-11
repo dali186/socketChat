@@ -12,6 +12,5 @@ public interface ChatMessageRepository extends MongoRepository<ChatMessage, Stri
     @Query("{roomId: ?0}")
     List<ChatMessage> mFindByRoomId(String Id);
 
-    @Query("{roomId:  ?0}")
-    Optional<ChatMessage> findFirstByRoomIdOrderByCreatedAtDesc(String id);
+    List<ChatMessage> findTopByRoomIdOrderByCreatedAtDesc(String id);
 }
