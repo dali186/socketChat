@@ -10,7 +10,7 @@ public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
     @Query("{$and: [{memberList: ?0}, {memberList: ?1}]}")
     ChatRoom findDuplicatedRoom(Long memberId, Long opId);
 
-    @Query("{memberList: ?0, type: 'PERSONAL'}")
+    @Query(value = "{memberList: ?0, type: 'PERSONAL'}")
     List<ChatRoom> findPersonalRoomById(Long memberId);
 
     @Query("{memberList: ?0}")

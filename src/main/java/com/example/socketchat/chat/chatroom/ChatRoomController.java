@@ -2,7 +2,6 @@ package com.example.socketchat.chat.chatroom;
 
 import com.example.socketchat.chat.chatmessage.ChatMessage;
 import com.example.socketchat.chat.chatmessage.ChatMessageRepository;
-import com.example.socketchat.member.MemberService;
 import com.example.socketchat.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,8 +11,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 
 @Controller
@@ -90,6 +91,9 @@ public class ChatRoomController {
 
             chatRoomListDTO.add(chatRoomInfo);
         }
-        return chatRoomListDTO;
+
+        return chatRoomListDTO.stream()
+                .sorted(Comparator.comparing(ChatRoomResponse.ChatRoomListDTO::getTime, Comparator.reverseOrder()))
+                .collect(Collectors.toList());
     }
 }
