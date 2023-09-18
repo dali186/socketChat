@@ -17,7 +17,11 @@
       <form th:action="@{/chat/open/g}" method="post">
         <div class="form-group">
           <label for="title">채팅방 이름</label>
-          <input type="text" class="form-control" id="title" name="chatTitle" placeholder="Enter title">
+          <input type="text" class="form-control" id="title" name="title" placeholder="Enter title">
+        </div>
+        <div class="form-group">
+          <label for="memberList">참여자 ID</label>
+          <input type="text" class="form-control" id="memberList" name="memberList" placeholder="Enter member's Id, separate with -">
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
       </form>

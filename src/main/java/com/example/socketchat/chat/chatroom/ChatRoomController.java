@@ -30,7 +30,7 @@ public class ChatRoomController {
      * 공통 메소드
      */
     //채팅방 목록 출력 (단체톡 조회랑 개인톡 조회 api를 분리해도 좋을 것 같음)
-    //TODO 최근 채팅, 시간 조회 + 채팅방 이름 상대방으로 적용 (DONE)
+    //TODO 최근 채팅, 시간 조회 + 채팅방 이름 상대방으로 적용 (DONE) + 누가 보냈는 지
     //TODO 안읽은 내역 개수 처리
     //TODO 실시간으로 업데이트 방법 고려
     @GetMapping("/chat/rooms")
@@ -43,6 +43,37 @@ public class ChatRoomController {
         model.addAttribute("gRoomInfoList", chatRoomListInfo(memberId, ChatRoomType.GROUP));
 
         return "chatroomlist";
+    }
+
+
+    //채팅방의 정보를 설정하는 메소드
+    private List<ChatRoomResponse.ChatRoomListDTO> chatRoomListInfo(Long memberId, ChatRoomType type) {
+        List<ChatRoomResponse.ChatRoomListDTO> chatRoomListDTO = new ArrayList<>();
+        List<ChatRoom> chatRoomList = chatRoomService.findChatRoomByChatRoomType(memberId, type);
+        for (int i = 0; i < chatRoomList.size(); i++) {
+            ChatRoomResponse.ChatRoomListDTO chatRoomInfo = new ChatRoomResponse.ChatRoomListDTO();
+            ChatRoom chatRoom = chatRoomList.get(i);
+            chatRoomInfo.setRoomId(chatRoom.getId());
+            //채팅방 제목을 설정하는 부분
+            if (chatRoom.getType().equals(ChatRoomType.PERSONAL)) {
+                StringTokenizer tokenizer = new StringTokenizer(chatRoom.getTitle(), "_");
+                String tempTitle = tokenizer.nextToken();
+                chatRoomInfo.setRoomTitle(tempTitle);
+                if (Long.parseLong(tempTitle) == memberId) chatRoomInfo.setRoomTitle(tokenizer.nextToken());
+            } else {
+                chatRoomInfo.setRoomTitle(chatRoom.getTitle());
+            }
+            //TODO 쿼리수정 - duplicate key (DONE)
+            ChatMessage message = chatMessageRepository.findTopByRoomIdOrderByCreatedAtDesc(chatRoom.getId()).get(0);
+            chatRoomInfo.setRecentMessage(message.getContent());
+            chatRoomInfo.setTime(message.getCreatedAt());
+
+            chatRoomListDTO.add(chatRoomInfo);
+        }
+
+        return chatRoomListDTO.stream()
+                .sorted(Comparator.comparing(ChatRoomResponse.ChatRoomListDTO::getTime, Comparator.reverseOrder()))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/chat/room/{roomId}")
@@ -81,36 +112,6 @@ public class ChatRoomController {
         return "redirect:/chat/room/" + roomId;
     }
 
-    //채팅방의 정보를 설정하는 메소드
-    private List<ChatRoomResponse.ChatRoomListDTO> chatRoomListInfo(Long memberId, ChatRoomType type) {
-        List<ChatRoomResponse.ChatRoomListDTO> chatRoomListDTO = new ArrayList<>();
-        List<ChatRoom> chatRoomList = chatRoomService.findChatRoomByChatRoomType(memberId, type);
-        for (int i = 0; i < chatRoomList.size(); i++) {
-            ChatRoomResponse.ChatRoomListDTO chatRoomInfo = new ChatRoomResponse.ChatRoomListDTO();
-            ChatRoom chatRoom = chatRoomList.get(i);
-            chatRoomInfo.setRoomId(chatRoom.getId());
-            //채팅방 제목을 설정하는 부분
-            if (chatRoom.getType().equals(ChatRoomType.PERSONAL)) {
-                StringTokenizer tokenizer = new StringTokenizer(chatRoom.getTitle(), "_");
-                String tempTitle = tokenizer.nextToken();
-                chatRoomInfo.setRoomTitle(tempTitle);
-                if (Long.parseLong(tempTitle) == memberId) chatRoomInfo.setRoomTitle(tokenizer.nextToken());
-            } else {
-                chatRoomInfo.setRoomTitle(chatRoom.getTitle());
-            }
-            //TODO 쿼리수정 - duplicate key (DONE)
-            ChatMessage message = chatMessageRepository.findTopByRoomIdOrderByCreatedAtDesc(chatRoom.getId()).get(0);
-            chatRoomInfo.setRecentMessage(message.getContent());
-            chatRoomInfo.setTime(message.getCreatedAt());
-
-            chatRoomListDTO.add(chatRoomInfo);
-        }
-
-        return chatRoomListDTO.stream()
-                .sorted(Comparator.comparing(ChatRoomResponse.ChatRoomListDTO::getTime, Comparator.reverseOrder()))
-                .collect(Collectors.toList());
-    }
-
     /**
      * 단체 채팅 Controller
      */
@@ -122,14 +123,13 @@ public class ChatRoomController {
     }
 
     @PostMapping("/chat/open/g")
-    public String openGroupRoom(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody String chatTitle) {
+    public String openGroupRoom(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ChatRoomRequest.GroupRoomDetailsDTO details) {
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.getMemberList().add(userDetails.getUserId());
 
         chatRoom.setType(ChatRoomType.GROUP);
-        StringTokenizer tokenizer = new StringTokenizer(chatTitle, "=");
-        tokenizer.nextToken();
-        chatRoom.setTitle(tokenizer.nextToken());
+        chatRoom.setTitle(details.getTitle());
+        //chatRoom.setMemberList();
 
         String roomId = chatRoomService.openChatRoom(chatRoom);
 

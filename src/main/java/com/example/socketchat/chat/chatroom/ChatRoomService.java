@@ -44,8 +44,8 @@ public class ChatRoomService {
     }
 
     @Transactional
-    public List<ChatRoom> findGroupChatRooms(Long memberId) {
-        List<ChatRoom> chatRooms = chatRoomRepository.findGroupRoomById(memberId);
+    public List<ChatRoom> findGroupChatRooms() {
+        List<ChatRoom> chatRooms = chatRoomRepository.findGroupRoomById();
         return chatRooms;
     }
 

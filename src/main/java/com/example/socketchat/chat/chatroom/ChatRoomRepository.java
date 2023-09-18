@@ -13,8 +13,8 @@ public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
     @Query(value = "{memberList: ?0, type: 'PERSONAL'}")
     List<ChatRoom> findPersonalRoomById(Long memberId);
 
-    @Query("{memberList: ?0, type: 'GROUP'}")
-    List<ChatRoom> findGroupRoomById(Long memberId);
+    @Query("{type: 'GROUP'}")
+    List<ChatRoom> findGroupRoomById();
 
     @Query("{_id: ?0}")
     ChatRoom findRoomById(String roomId);
